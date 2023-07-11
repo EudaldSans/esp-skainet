@@ -176,12 +176,18 @@ dac_audio_item_t playlist[] = {
     {"me_26_degrees", (uint16_t*)me_26_degrees, sizeof(me_26_degrees)},
 };
 
-void wake_up_action(void)
-{
-    esp_audio_play((int16_t *)(playlist[0].data), playlist[0].length, portMAX_DELAY);
+void wake_up_action(void) {
+    // esp_audio_play((int16_t *)(playlist[0].data), playlist[0].length, portMAX_DELAY);
 }
 
-void speech_commands_action(int command_id)
-{
-    esp_audio_play((int16_t *)(playlist[command_id + 1].data), playlist[command_id + 1].length, portMAX_DELAY);
+void speech_commands_action(int command_id) {
+    // esp_audio_play((int16_t *)(playlist[command_id + 1].data), playlist[command_id + 1].length, portMAX_DELAY);
+    switch (command_id) {
+        case 1: printf("apaga\n"); break;
+        case 2: printf("sube"); break;
+        case 3: printf("baja\n"); break;
+        case 4: printf("ayuda\n"); break;
+        case 5: printf("enciende\n"); break;
+        default: printf("default\n"); break;
+    }
 }
