@@ -183,11 +183,9 @@ void wake_up_action(void) {
 void speech_commands_action(int command_id) {
     // esp_audio_play((int16_t *)(playlist[command_id + 1].data), playlist[command_id + 1].length, portMAX_DELAY);
     switch (command_id) {
-        case 1: printf("apaga\n"); break;
-        case 2: printf("sube"); break;
-        case 3: printf("baja\n"); break;
-        case 4: printf("ayuda\n"); break;
-        case 5: printf("enciende\n"); break;
+        case 0: printf("enciende\n"); break;
+        case 1: printf("apaga"); break;
+        case 2: printf("ayuda"); break;
         default: printf("default\n"); break;
     }
 }

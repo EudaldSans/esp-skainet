@@ -88,16 +88,18 @@ void detect_Task(void *arg) {
             break;
         }
 
-        // if (res->wakeup_state == WAKENET_DETECTED) {
-        //     printf("WAKEWORD DETECTED\n");
-	    // multinet->clean(model_data);
-        // } else if (res->wakeup_state == WAKENET_CHANNEL_VERIFIED) {
-        //     play_voice = -1;
-        //     detect_flag = 1;
-        //     printf("AFE_FETCH_CHANNEL_VERIFIED, channel index: %d\n", res->trigger_channel_id);
-        //     // afe_handle->disable_wakenet(afe_data);
-        //     // afe_handle->disable_aec(afe_data);
-        // }
+        if (res->wakeup_state == WAKENET_DETECTED) {
+            printf("WAKEWORD DETECTED\n");
+	    multinet->clean(model_data);
+        } else if (res->wakeup_state == WAKENET_CHANNEL_VERIFIED) {
+            play_voice = -1;
+            detect_flag = 1;
+            printf("AFE_FETCH_CHANNEL_VERIFIED, channel index: %d\n", res->trigger_channel_id);
+            // afe_handle->disable_wakenet(afe_data);
+            // afe_handle->disable_aec(afe_data);
+        }
+
+        if (!detect_flag) continue;
 
         esp_mn_state_t mn_state = multinet->detect(model_data, res->data);
 
