@@ -152,9 +152,17 @@ void wake_up_action(void) {
 void speech_commands_action(int command_id) {
     // esp_audio_play((int16_t *)(playlist[command_id + 1].data), playlist[command_id + 1].length, portMAX_DELAY);
     switch (command_id) {
-        case 0: printf("enciende\n"); light_status = 1; break;
-        case 1: printf("apaga"); light_status = 0; break;
-        case 2: printf("ayuda"); break;
+        case 1: printf("enciende\n"); light_status = 1; break;
+        case 2: printf("apaga\n"); light_status = 0; break;
+        case 3: 
+            printf("sube\n");
+            if (light_level < 100) {light_level += 10;}
+            break;
+        case 4:
+            printf("baja\n");
+            if (light_level > 0) {light_level -=10;}
+            break;
+        case 5: printf("ayuda\n"); break;
         default: printf("default\n"); break;
     }
 }
