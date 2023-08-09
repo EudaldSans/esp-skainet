@@ -48,6 +48,7 @@
 #include "speech_commands_action.h"
 
 extern int detect_flag;
+uint8_t light_level = 50, light_status;
 
 typedef struct {
     char* name;
@@ -55,14 +56,12 @@ typedef struct {
     int length;
 } dac_audio_item_t;
 
-#if defined CONFIG_ESP32_S3_KORVO_1_V4_0_BOARD
 #include "led_strip.h"
 #include "driver/rmt.h"
 #define EXAMPLE_CHASE_SPEED_MS (10)
 #define RMT_TX_CHANNEL RMT_CHANNEL_0
 led_strip_t *strip = NULL;
-void led_Task(void *arg)
-{
+void led_Task(void *arg) {
     rmt_config_t config = RMT_DEFAULT_CONFIG_TX(19, RMT_TX_CHANNEL);
     // set counter clock to 40MHz
     config.clk_div = 2;
@@ -85,7 +84,8 @@ void led_Task(void *arg)
     ESP_ERROR_CHECK(strip->refresh(strip, 100));
     while (1) {
         for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 12; j += 1) {
+            ESP_ERROR_CHECK(strip->set_pixel(strip, 0, light_level * light_status, light_level * light_status, light_level * light_status));
+            for (int j = 1; j < 12; j += 1) {
                 // Build RGB values
                 ESP_ERROR_CHECK(strip->set_pixel(strip, j, 100 * detect_flag, 0.5 * i * 0, 0.5 * i * (1 - detect_flag)));
                 // Flush RGB values to LEDs
@@ -95,7 +95,9 @@ void led_Task(void *arg)
         }
 
         for (int i = 100; i > 0; i--) {
-            for (int j = 0; j < 12; j += 1) {
+            ESP_ERROR_CHECK(strip->set_pixel(strip, 0, light_level * light_status, light_level * light_status, light_level * light_status));
+
+            for (int j = 1; j < 12; j += 1) {
                 // Build RGB values
                 ESP_ERROR_CHECK(strip->set_pixel(strip, j, 100 * detect_flag, 0.5 * i * 0, 0.5 * i * (1 - detect_flag)));
                 ESP_ERROR_CHECK(strip->refresh(strip, 100));
@@ -105,39 +107,6 @@ void led_Task(void *arg)
         vTaskDelay(pdMS_TO_TICKS(EXAMPLE_CHASE_SPEED_MS));
     }
 }
-#elif defined CONFIG_ESP32_KORVO_V1_1_BOARD
-#include "ws2812.h"
-void led_init(void)
-{
-    init_ws2812();
-}
-
-void led_on(int gpio)
-{
-    gpio_set_level(gpio, true);
-}
-
-void led_off(int gpio)
-{
-    gpio_set_level(gpio, false);
-}
-
-void led_Task(void * arg)
-{
-    int on = 0;
-    while (1) {
-        if (detect_flag && on == 0) {
-            blue_light_on();
-            on = 1;
-        } else if (detect_flag == 0 && on == 1) {
-            light_off();
-            on = 0;
-        } else {
-            vTaskDelay(10 / portTICK_PERIOD_MS);
-        }
-    }
-}
-#endif
 
 dac_audio_item_t playlist[] = {
     // {"ie_kaiji.h", (uint16_t*)ie_kaiji, sizeof(ie_kaiji)},
@@ -183,8 +152,8 @@ void wake_up_action(void) {
 void speech_commands_action(int command_id) {
     // esp_audio_play((int16_t *)(playlist[command_id + 1].data), playlist[command_id + 1].length, portMAX_DELAY);
     switch (command_id) {
-        case 0: printf("enciende\n"); break;
-        case 1: printf("apaga"); break;
+        case 0: printf("enciende\n"); light_status = 1; break;
+        case 1: printf("apaga"); light_status = 0; break;
         case 2: printf("ayuda"); break;
         default: printf("default\n"); break;
     }

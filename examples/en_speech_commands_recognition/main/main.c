@@ -27,6 +27,8 @@ static volatile int task_flag = 0;
 srmodel_list_t *models = NULL;
 static int play_voice = -2;
 
+uint16_t results[12] = {0};
+
 void play_music(void *arg) {
     while (task_flag) {
         switch (play_voice) {
@@ -110,25 +112,28 @@ void detect_Task(void *arg) {
         if (mn_state == ESP_MN_STATE_DETECTED) {
             esp_mn_results_t *mn_result = multinet->get_results(model_data);
 
-            if (mn_result->command_id[0] == 0) {
-                detect_flag = 1;
-            } else if (detect_flag) {
-                play_voice = mn_result->command_id[0];
-            }
+            play_voice = mn_result->command_id[0];
 
-            for (int i = 0; i < mn_result->num; i++) {
-                printf("TOP %d, command_id: %d, phrase_id: %d, string: %s, prob: %f\n", 
-                i+1, mn_result->command_id[i], mn_result->phrase_id[i], mn_result->string, mn_result->prob[i]);
-            }
-            printf("-----------listening-----------\n");
+
+            // if (mn_result->command_id[0] == 0 || mn_result->command_id[0] == 1) {
+            //     detect_flag = 1;
+            // } else if (detect_flag) {
+            //     play_voice = mn_result->command_id[0];
+            // }
+
+            // for (int i = 0; i < mn_result->num; i++) {
+            //     printf("TOP %d, command_id: %d, phrase_id: %d, string: %s, prob: %f\n", 
+            //     i+1, mn_result->command_id[i], mn_result->phrase_id[i], mn_result->string, mn_result->prob[i]);
+            // }
+            // printf("-----------listening-----------\n");
         }
 
         if (mn_state == ESP_MN_STATE_TIMEOUT) {
             esp_mn_results_t *mn_result = multinet->get_results(model_data);
-            printf("timeout, string:%s\n", mn_result->string);
+            // printf("timeout, string:%s\n", mn_result->string);
             afe_handle->enable_wakenet(afe_data);
             detect_flag = 0;
-            printf("\n-----------awaits to be waken up-----------\n");
+            // printf("\n-----------awaits to be waken up-----------\n");
             continue;
         }    
     }
@@ -166,6 +171,12 @@ void app_main() {
         afe_config.pcm_config.ref_num = 1;
     #endif
 #endif
+
+    afe_config.pcm_config.total_ch_num = 3;
+    afe_config.pcm_config.mic_num = 2;
+    afe_config.pcm_config.ref_num = 1;
+    
+    afe_config.aec_init = false;
     esp_afe_sr_data_t *afe_data = afe_handle->create_from_config(&afe_config);
 
     task_flag = 1;
